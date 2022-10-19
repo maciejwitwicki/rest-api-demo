@@ -13,4 +13,11 @@ public class ErrorHandler {
     String handleNotFound(NotFoundException e) {
         return "Requested resource not found";
     }
+
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    String handleInternalServerError(Exception e) {
+        return "Internal server error";
+    }
 }

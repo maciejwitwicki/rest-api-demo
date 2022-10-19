@@ -1,36 +1,36 @@
 package demo.rest.employee;
 
 import demo.rest.exception.NotFoundException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@RestController("/employees")
+@RestController
+@RequestMapping("/users")
 public class UserController {
 
     private Map<UUID, User> users = init();
 
     @GetMapping
+    @ApiOperation(value = "List existing users")
     public Collection<User> getUsers() {
         return users.values();
     }
 
     @PostMapping
-    public User create(@RequestBody User e) {
-        var toBeCreated = User.create(e.name(), e.designation(), e.salary());
+    @ApiOperation(value = "Create new user")
+    public User create(@RequestBody User user) {
+        var toBeCreated = User.create(user.name(), user.designation(), user.salary());
         users.put(toBeCreated.id(), toBeCreated);
         return toBeCreated;
     }
 
     @DeleteMapping("/{id}")
+    @ApiOperation(value = "Remove user by id")
     public User deleteById(@PathVariable String id) {
         var found = users.get(UUID.fromString(id));
         if (found == null) {
