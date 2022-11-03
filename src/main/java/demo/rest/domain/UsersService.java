@@ -47,7 +47,7 @@ public class UsersService {
 
     public User deleteById(String id) {
         var found = getById(id);
-        users.remove(id);
+        users.remove(found.id());
         return found;
     }
 
