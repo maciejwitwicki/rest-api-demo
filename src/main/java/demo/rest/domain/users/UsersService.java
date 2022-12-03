@@ -1,53 +1,47 @@
-package demo.rest.domain;
+package demo.rest.domain.users;
 
+import demo.rest.domain.cars.Car;
+import demo.rest.domain.cars.CarModel;
 import demo.rest.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class UsersService {
 
-    private final CarsService carsService;
+    private final UserMapper userMapper;
+    private final UserRepository userRepository;
 
-    private Map<UUID, User> users = init();
-
-    private Map<UUID, User> init() {
-        var kowalski = User.create("Kowalski", "cook", 100_000.50).withCars(List.of(
-                new Car("FZ 777", CarModel.BMW), new Car("ZG 321", CarModel.SKODA)
-        ));
-        var nowak = User.create("Nowak", "chef", 200_050.80);
-        var drzyzga = User.create("Drzyzga", "waiter", 80_190.00);
-        return new HashMap<>(Map.of(kowalski.id(), kowalski, nowak.id(), nowak, drzyzga.id(), drzyzga));
-    }
-
+    @Transactional(readOnly = true)
     public Collection<User> getUsers(CarModel car) {
-        if (car != null) {
-            return users.values()
-                    .stream().filter(u -> u.cars()
-                            .stream()
-                            .anyMatch(c -> c.model().equals(car)))
-                    .toList();
-        }
-        return users.values();
+        return Optional.ofNullable(car)
+                .map(userRepository::findByCars_Model)
+                .orElseGet(() -> userRepository.findAll().stream())
+                .map(userMapper::mapToUser)
+                .toList();
     }
 
     public User save(User toBeCreated) {
-        users.put(toBeCreated.id(), toBeCreated);
-        return toBeCreated;
+        var entity = userMapper.mapToEntity(toBeCreated);
+        var saved = userRepository.save(entity);
+        return userMapper.mapToUser(saved);
     }
 
     public User getById(String id) {
-        return Optional.ofNullable(users.get(UUID.fromString(id)))
+        return userRepository.findById(id)
+                .map(userMapper::mapToUser)
                 .orElseThrow(() -> new NotFoundException("User with id %s not found".formatted(id)));
     }
 
     public User deleteById(String id) {
         var found = getById(id);
-        users.remove(found.id());
+        userRepository.deleteById(id);
         return found;
     }
 
@@ -63,8 +57,8 @@ public class UsersService {
         Optional.ofNullable(user.name())
                 .ifPresent(newUserBuilder::name);
 
-        Optional.ofNullable(user.designation())
-                .ifPresent(newUserBuilder::designation);
+        Optional.ofNullable(user.job())
+                .ifPresent(newUserBuilder::job);
 
         Optional.ofNullable(user.salary())
                 .ifPresent(newUserBuilder::salary);
