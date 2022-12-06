@@ -27,7 +27,9 @@ public class UsersService {
                 .toList();
     }
 
-    public User save(User toBeCreated) {
+    public User save(User user) {
+        var cars = user.cars().stream().map(c -> Car.create(c.registration(), c.model())).toList();
+        var toBeCreated = User.create(user.name(), user.job(), user.salary(), user.hiredOn(), cars);
         var entity = userMapper.mapToEntity(toBeCreated);
         var saved = userRepository.save(entity);
         return userMapper.mapToUser(saved);
@@ -45,11 +47,13 @@ public class UsersService {
         return found;
     }
 
+    @Transactional
     public User updateById(String id, User user) {
         getById(id);
         var updated = user.withId(UUID.fromString(id));
-        this.save(updated);
-        return updated;
+        var entity = userMapper.mapToEntity(updated);
+        var saved = userRepository.save(entity);
+        return userMapper.mapToUser(saved);
     }
 
     public User patchUpdateById(String id, User user) {

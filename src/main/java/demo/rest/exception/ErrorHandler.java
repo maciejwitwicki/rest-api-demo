@@ -1,7 +1,9 @@
 package demo.rest.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,7 +23,6 @@ public class ErrorHandler {
         log.error("unhandled", e);
         return "Requested resource not found";
     }
-
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     ErrorResponse handleAccessDenied(AccessDeniedException e) {
@@ -39,13 +40,13 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     String handleInternalServerError(Exception e) {
         log.error("unhandled", e);
-        return "Internal server error";
+        return "Internal server error: " + e.getMessage() ;
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler({MethodArgumentNotValidException.class, HttpMessageNotReadableException.class, DataIntegrityViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     String handleMethodArgumentNotValidExceptionError(Exception e) {
-        return "Incorrect request body " + e.getMessage();
+        return "Bad request: " + e.getMessage();
     }
 
     record ErrorResponse(int status, String error, LocalDateTime timestamp){}

@@ -6,6 +6,7 @@ import lombok.With;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,8 +20,9 @@ record User(
         String job,
         @Positive(message = "Salary can't be negative")
         Double salary,
+        LocalDateTime hiredOn,
         List<Car> cars) {
-    public static User create(String name, String job, double salary) {
-        return new User(UUID.randomUUID(), name, job, salary, List.of());
+    public static User create(String name, String job, double salary, LocalDateTime hiredOn, List<Car> cars) {
+        return new User(UUID.randomUUID(), name, job, salary, hiredOn, cars);
     }
 }

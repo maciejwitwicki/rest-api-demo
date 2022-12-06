@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +25,8 @@ public class CarsService {
                 .toList();
     }
 
-    public Car save(Car toBeCreated) {
+    public Car save(Car car) {
+        var toBeCreated = Car.create(car.registration(), car.model());
         var entity = carMapper.mapToEntity(toBeCreated);
         var saved = carRepository.save(entity);
         return carMapper.mapToCar(saved);

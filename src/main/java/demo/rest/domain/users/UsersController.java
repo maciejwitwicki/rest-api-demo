@@ -2,10 +2,8 @@ package demo.rest.domain.users;
 
 import demo.rest.domain.cars.Car;
 import demo.rest.domain.cars.CarModel;
-import demo.rest.security.SecurityRoles;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
-import io.swagger.annotations.SecurityDefinition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +19,7 @@ import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping(value = "/users")
 public class UsersController {
 
     private final UsersService usersService;
@@ -33,32 +31,31 @@ public class UsersController {
         return usersService.getUsers(car);
     }
 
-    @GetMapping(path = "{id}/cars", produces = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE})
+    @GetMapping(path = "{id}/cars")
     @ApiOperation(value = "List cars of user")
     public Collection<Car> getUserCars(@PathVariable String id) {
         return usersService.getUserCars(id);
     }
 
-    @PostMapping(produces = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE}, consumes = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE})
+    @PostMapping
     @ApiOperation(value = "Create new user")
     public User create(@Valid @RequestBody User user) {
-        var toBeCreated = User.create(user.name(), user.job(), user.salary());
-        return usersService.save(toBeCreated);
+        return usersService.save(user);
     }
 
-    @PutMapping(path = "/{id}", produces = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE}, consumes = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE})
+    @PutMapping(path = "/{id}")
     @ApiOperation(value = "Update user by id")
     public User update(@PathVariable String id, @Valid @RequestBody User user) {
         return usersService.updateById(id, user);
     }
 
-    @PatchMapping(path = "/{id}", produces = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE}, consumes = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE})
+    @PatchMapping(path = "/{id}")
     @ApiOperation(value = "Update some fields of user by id")
     public User patch(@PathVariable String id, @RequestBody User user) {
         return usersService.patchUpdateById(id, user);
     }
 
-    @DeleteMapping(path = "/{id}", produces = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE})
+    @DeleteMapping(path = "/{id}")
     @ApiOperation(value = "Remove user by id")
     public User deleteById(@PathVariable String id) {
         return usersService.deleteById(id);
@@ -70,7 +67,6 @@ public class UsersController {
     public Performance createDrivingPerformance(@PathVariable("id") String userId, @RequestBody PerformanceRequest request) {
         usersService.getById(userId);
         return performanceService.createPerformance("driving", userId, request.period(), request.rating());
-
     }
 
     @RolesAllowed(PERFORMANCE_ADMIN)
@@ -87,15 +83,16 @@ public class UsersController {
     @Authorization("performance_manager")
     public List<Performance> getDrivingPerformance(@PathVariable("id") String userId) {
         usersService.getById(userId);
-        return performanceService.getPerformances(userId,"driving");
+        return performanceService.getPerformances(userId, "driving");
     }
+
     @RolesAllowed({PERFORMANCE_ADMIN, PERFORMANCE_VIEWER})
     @GetMapping(path = "/{id}/performances/navigation-ratings")
     @ApiOperation(value = "Get user's performance in navigation")
     @Authorization("performance_manager")
     public List<Performance> getNavigationPerformance(@PathVariable("id") String userId) {
         usersService.getById(userId);
-        return performanceService.getPerformances(userId,"navigation");
+        return performanceService.getPerformances(userId, "navigation");
     }
 
 }

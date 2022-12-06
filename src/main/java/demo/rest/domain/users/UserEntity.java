@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -24,7 +25,7 @@ public class UserEntity {
     String job;
     double salary;
     LocalDateTime hiredOn;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name="userId")
     List<CarEntity> cars;
 }
